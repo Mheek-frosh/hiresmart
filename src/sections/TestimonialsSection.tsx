@@ -1,62 +1,7 @@
-import { useRef, useEffect } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import SectionHeader from '@/components/SectionHeader'
 import { Quote, Star } from 'lucide-react'
 
-gsap.registerPlugin(ScrollTrigger)
-
-const testimonials = [
-  {
-    quote:
-      "HireSmart reduced our time-to-hire from 45 days to 12 days. The AI matching is eerily accurate.",
-    name: 'Sarah Chen',
-    role: 'VP Talent at TechCorp',
-    avatar: '/avatar-1.jpg',
-    rating: 5,
-  },
-  {
-    quote:
-      "We've seen a 40% improvement in candidate quality since switching. The predictive analytics are game-changing.",
-    name: 'Marcus Johnson',
-    role: 'Head of Recruiting at Finova',
-    avatar: '/avatar-2.jpg',
-    rating: 5,
-  },
-  {
-    quote:
-      "The bias detection feature helped us diversify our engineering team by 35% in just one quarter.",
-    name: 'Priya Sharma',
-    role: 'People Director at CloudScale',
-    avatar: '/avatar-3.jpg',
-    rating: 4,
-  },
-  {
-    quote:
-      "The onboarding experience was seamless and our hiring velocity doubled within weeks. Support is exceptional.",
-    name: 'Nina Lopez',
-    role: 'Talent Operations Lead at NovaWorks',
-    avatar: '/avatar-2.jpg',
-    rating: 5,
-  },
-  {
-    quote:
-      "Our recruiters love the AI notes — they save hours each week and reduce bias in screening.",
-    name: 'Omar Khalid',
-    role: 'Recruiting Manager at BrightWorks',
-    avatar: '/avatar-1.jpg',
-    rating: 4,
-  },
-  {
-    quote:
-      "The interview scheduling automation is a lifesaver. Candidate experience improved dramatically.",
-    name: 'Elaine Park',
-    role: 'Head of People Ops at Retailo',
-    avatar: '/avatar-3.jpg',
-    rating: 5,
-  },
-]
-
+/* ── Avatar helpers ─────────────────────────────────────────────── */
 const avatarColors = [
   'from-violet-500 to-purple-600',
   'from-sky-500 to-blue-600',
@@ -64,8 +9,6 @@ const avatarColors = [
   'from-rose-500 to-pink-600',
   'from-amber-500 to-orange-600',
   'from-indigo-500 to-violet-600',
-  'from-cyan-500 to-sky-600',
-  'from-fuchsia-500 to-purple-600',
 ]
 
 function getInitials(name: string) {
@@ -77,60 +20,179 @@ function getInitials(name: string) {
     .toUpperCase()
 }
 
-export default function TestimonialsSection() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const cardsRef = useRef<HTMLDivElement>(null)
+/* ── Data ────────────────────────────────────────────────────────── */
+interface TestimonialData {
+  quote: string
+  name: string
+  role: string
+  rating: number
+  colorIdx: number
+}
 
-  useEffect(() => {
-    const section = sectionRef.current
-    const cards = cardsRef.current
-    if (!section || !cards) return
+const row1: TestimonialData[] = [
+  {
+    quote:
+      'HireSmart reduced our time-to-hire from 45 days to 12 days. The AI matching is eerily accurate.',
+    name: 'Sarah Chen',
+    role: 'VP Talent at TechCorp',
+    rating: 5,
+    colorIdx: 0,
+  },
+  {
+    quote:
+      "We've seen a 40% improvement in candidate quality since switching. The predictive analytics are game-changing.",
+    name: 'Marcus Johnson',
+    role: 'Head of Recruiting at Finova',
+    rating: 5,
+    colorIdx: 1,
+  },
+  {
+    quote:
+      'The bias detection feature helped us diversify our engineering team by 35% in just one quarter.',
+    name: 'Priya Sharma',
+    role: 'People Director at CloudScale',
+    rating: 4,
+    colorIdx: 2,
+  },
+]
 
-    const prefersReducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)'
-    ).matches
-    if (prefersReducedMotion) return
+const row2: TestimonialData[] = [
+  {
+    quote:
+      'The onboarding experience was seamless and our hiring velocity doubled within weeks. Support is exceptional.',
+    name: 'Nina Lopez',
+    role: 'Talent Operations Lead at NovaWorks',
+    rating: 5,
+    colorIdx: 3,
+  },
+  {
+    quote:
+      'Our recruiters love the AI notes — they save hours each week and reduce bias in screening.',
+    name: 'Omar Khalid',
+    role: 'Recruiting Manager at BrightWorks',
+    rating: 4,
+    colorIdx: 4,
+  },
+  {
+    quote:
+      'The interview scheduling automation is a lifesaver. Candidate experience improved dramatically.',
+    name: 'Elaine Park',
+    role: 'Head of People Ops at Retailo',
+    rating: 5,
+    colorIdx: 5,
+  },
+]
 
-    gsap.from(cards.children, {
-      y: 40,
-      opacity: 0,
-      scale: 0.97,
-      stagger: 0.12,
-      duration: 0.8,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: section,
-        start: 'top 75%',
-        toggleActions: 'play none none none',
-      },
-    })
+/* ── Single Card ─────────────────────────────────────────────────── */
+function TestimonialCard({ quote, name, role, rating, colorIdx }: TestimonialData) {
+  return (
+    <div className="w-[360px] flex-shrink-0 rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+      {/* Quote icon */}
+      <div className="mb-4 inline-flex items-center justify-center rounded-2xl bg-slate-100 p-2 text-sky-600">
+        <Quote className="w-5 h-5" />
+      </div>
 
-    // Floating animations: vertical bobbing so cards stay within container bounds
-    Array.from(cards.children).forEach((el, i) => {
-      const amplitude = 6 + (i % 3) * 3 // vary amplitude: 6, 9, 12 px
-      const dur = 3.2 + (i % 4) * 0.5  // stagger durations: 3.2 - 4.7s
-      const delay = (i % 5) * 0.4       // offset phases so they don't all move together
-      gsap.to(el, {
-        y: amplitude,
-        yoyo: true,
-        repeat: -1,
-        ease: 'sine.inOut',
-        duration: dur,
-        delay: delay,
-      })
-    })
+      {/* Quote text */}
+      <p className="text-sm text-slate-700 italic leading-relaxed mb-4">
+        &ldquo;{quote}&rdquo;
+      </p>
 
-    return () => {
-      ScrollTrigger.getAll().forEach((t) => {
-        if (t.trigger === section) t.kill()
-      })
-    }
-  }, [])
+      {/* Stars */}
+      <div className="flex items-center gap-1.5 mb-4">
+        {Array.from({ length: 5 }).map((_, idx) => (
+          <Star
+            key={idx}
+            className={`w-4 h-4 ${
+              idx < rating ? 'text-yellow-400 fill-yellow-400' : 'text-slate-200'
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Author */}
+      <div className="flex items-center gap-3">
+        <div
+          className={`w-10 h-10 rounded-full bg-gradient-to-br ${
+            avatarColors[colorIdx % avatarColors.length]
+          } flex items-center justify-center text-white text-xs font-bold ring-2 ring-white shadow-sm flex-shrink-0`}
+        >
+          {getInitials(name)}
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-slate-900">{name}</p>
+          <p className="text-xs text-slate-500">{role}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Marquee Row ─────────────────────────────────────────────────── */
+interface MarqueeRowProps {
+  items: TestimonialData[]
+  direction: 'left' | 'right'
+  /** seconds for one full cycle */
+  speed?: number
+}
+
+function MarqueeRow({ items, direction, speed = 32 }: MarqueeRowProps) {
+  /*
+   * Duplicate 4× so the track is always wider than any viewport.
+   * Animation moves exactly -25% (= 1 copy width), giving a seamless loop:
+   *   left:  translateX(0)    → translateX(-25%)
+   *   right: translateX(-25%) → translateX(0)
+   */
+  const track = [...items, ...items, ...items, ...items]
+  const animName = direction === 'left' ? 'marqueeLeft' : 'marqueeRight'
+
+  function pause(e: React.MouseEvent<HTMLDivElement>) {
+    ;(e.currentTarget as HTMLDivElement).style.animationPlayState = 'paused'
+  }
+  function resume(e: React.MouseEvent<HTMLDivElement>) {
+    ;(e.currentTarget as HTMLDivElement).style.animationPlayState = 'running'
+  }
 
   return (
-    <section ref={sectionRef} id="testimonials" className="w-full bg-transparent py-20">
+    <div className="relative overflow-hidden py-3">
+      {/* Left fade mask — matches page background #F8FAFC */}
+      <div
+        className="pointer-events-none absolute left-0 top-0 z-10 h-full w-28 sm:w-40"
+        style={{
+          background: 'linear-gradient(to right, #F8FAFC 0%, transparent 100%)',
+        }}
+      />
+      {/* Right fade mask */}
+      <div
+        className="pointer-events-none absolute right-0 top-0 z-10 h-full w-28 sm:w-40"
+        style={{
+          background: 'linear-gradient(to left, #F8FAFC 0%, transparent 100%)',
+        }}
+      />
+
+      {/* Scrolling track */}
+      <div
+        className="flex gap-5 w-max will-change-transform"
+        style={{
+          animation: `${animName} ${speed}s linear infinite`,
+        }}
+        onMouseEnter={pause}
+        onMouseLeave={resume}
+      >
+        {track.map((item, i) => (
+          <TestimonialCard key={`${item.name}-${i}`} {...item} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* ── Section ─────────────────────────────────────────────────────── */
+export default function TestimonialsSection() {
+  return (
+    <section id="testimonials" className="w-full py-20" style={{ background: '#F8FAFC' }}>
+      {/* Header — constrained width */}
       <div className="max-w-[1280px] mx-auto px-6">
-        <div className="text-center mb-8">
+        <div className="text-center mb-12">
           <SectionHeader
             overline="TESTIMONIALS"
             heading="Words of praise from customers"
@@ -138,46 +200,12 @@ export default function TestimonialsSection() {
             className="!mb-6"
           />
         </div>
+      </div>
 
-        <div className="rounded-[2rem] bg-white p-8 shadow-lg overflow-visible">
-          <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.map((t, colorIdx) => (
-              <div
-                key={t.name}
-                className="group rounded-xl border border-slate-100 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md"
-              >
-                <div className="mb-4 inline-flex items-center justify-center rounded-2xl bg-slate-100 p-2 text-sky-600">
-                  <Quote className="w-5 h-5" />
-                </div>
-                <p className="text-sm text-slate-700 italic leading-relaxed mb-4">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-
-                <div className="flex items-center gap-2 mb-3">
-                  {Array.from({ length: 5 }).map((_, idx) => (
-                    <Star
-                      key={idx}
-                      className={`w-4 h-4 ${idx < (t.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-200'}`}
-                    />
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-3">
-                  {/* Gradient avatar with initials — works without image files */}
-                  <div
-                    className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarColors[colorIdx % avatarColors.length]} flex items-center justify-center text-white text-xs font-bold ring-2 ring-white shadow-sm flex-shrink-0`}
-                  >
-                    {getInitials(t.name)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">{t.name}</p>
-                    <p className="text-xs text-slate-500">{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Full-bleed marquee rows */}
+      <div className="space-y-5">
+        <MarqueeRow items={row1} direction="left"  speed={34} />
+        <MarqueeRow items={row2} direction="right" speed={40} />
       </div>
     </section>
   )

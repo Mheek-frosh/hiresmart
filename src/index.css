@@ -67,3 +67,14 @@
     border-image: linear-gradient(135deg, #2563EB, #7C3AED) 1;
   }
 }
+
+/* ── Testimonial marquee animations ────────────────────────────── */
+@keyframes marqueeLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-25%); }
+}
+
+@keyframes marqueeRight {
+  from { transform: translateX(-25%); }
+  to   { transform: translateX(0); }
+}
