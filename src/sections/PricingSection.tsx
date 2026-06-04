@@ -97,9 +97,6 @@ export default function PricingSection() {
             subheading="Choose a tier that matches your hiring volume, automation needs, and enterprise priorities."
             className="!mb-8"
           />
-          <p className="mx-auto max-w-2xl text-sm text-slate-500">
-            Transparent pricing with built-in candidate intelligence, collaborative workflows, and compliance support for every growth stage.
-          </p>
         </div>
 
         <div
