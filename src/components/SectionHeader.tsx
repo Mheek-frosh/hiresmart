@@ -68,7 +68,7 @@ export default function SectionHeader({
       </h2>
       {subheading && (
         <p
-          className={`mt-4 text-base max-w-lg ${
+          className={`mt-4 text-base max-w-lg mx-auto text-center ${
             dark ? 'text-slate-400' : 'text-slate-500'
           }`}
         >

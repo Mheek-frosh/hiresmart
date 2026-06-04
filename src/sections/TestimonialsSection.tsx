@@ -55,22 +55,6 @@ const testimonials = [
     avatar: '/avatar-3.jpg',
     rating: 5,
   },
-  {
-    quote:
-      "Support and onboarding were exceptional — we rolled out across the company in days.",
-    name: 'Carlos Mendes',
-    role: 'CTO at NeoHire',
-    avatar: '/avatar-2.jpg',
-    rating: 5,
-  },
-  {
-    quote:
-      "Custom integrations saved us time and the dedicated account manager is top-notch.",
-    name: 'Lina Gomez',
-    role: 'Director of Talent at HealthPlus',
-    avatar: '/avatar-1.jpg',
-    rating: 4,
-  },
 ]
 
 const avatarColors = [
