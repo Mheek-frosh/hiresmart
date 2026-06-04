@@ -79,11 +79,14 @@ export default function Navigation() {
             </button>
           ))}
 
-          <div className="relative" onMouseLeave={() => setCompanyOpen(false)}>
+          <div
+            className="relative"
+            onMouseEnter={() => setCompanyOpen(true)}
+            onMouseLeave={() => setCompanyOpen(false)}
+          >
             <button
               type="button"
               onClick={() => setCompanyOpen(!companyOpen)}
-              onMouseEnter={() => setCompanyOpen(true)}
               className={`inline-flex items-center gap-1 text-sm font-medium transition-colors duration-300 hover:text-primary ${
                 scrolled ? 'text-slate-700' : 'text-slate-200'
               }`}
@@ -95,6 +98,7 @@ export default function Navigation() {
               className={`absolute right-0 mt-3 w-44 rounded-3xl border border-slate-200/80 bg-white py-3 shadow-2xl transition-all duration-200 ${
                 companyOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
               }`}
+              onMouseEnter={() => setCompanyOpen(true)}
             >
               {companyLinks.map((link) => (
                 <Link

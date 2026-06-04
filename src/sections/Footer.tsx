@@ -100,6 +100,40 @@ export default function Footer() {
           ))}
         </div>
 
+        <div className="rounded-[2rem] border border-white/[0.08] bg-slate-950/90 p-8 sm:p-10 mb-10">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Subscribe to our newsletter
+              </h3>
+              <p className="text-sm text-slate-400 max-w-xl">
+                Get hiring insights, new product updates, and recruiting trends delivered straight to your inbox.
+              </p>
+            </div>
+            <form className="w-full max-w-xl" onSubmit={(event) => event.preventDefault()}>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <label htmlFor="footer-newsletter" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="footer-newsletter"
+                  type="email"
+                  placeholder="Enter your email"
+                  className="min-w-0 flex-1 rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                />
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:brightness-110"
+                >
+                  Subscribe
+                </button>
+              </div>
+              <p className="mt-3 text-xs text-slate-500">
+                We respect your privacy. Unsubscribe anytime.
+              </p>
+            </form>
+          </div>
+        </div>
 
         <div className="border-t border-white/[0.08] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-slate-600">

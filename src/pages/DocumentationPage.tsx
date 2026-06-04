@@ -5,7 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Navigation from '@/sections/Navigation'
 import Footer from '@/sections/Footer'
 import SectionHeader from '@/components/SectionHeader'
-import { Code, BookOpen, Layers, ShieldCheck } from 'lucide-react'
+import { Code, Layers, ShieldCheck } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
