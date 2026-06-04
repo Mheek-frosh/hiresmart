@@ -73,48 +73,40 @@ export default function TestimonialsSection() {
   }, [])
 
   return (
-    <section
-      ref={sectionRef}
-      id="testimonials"
-      className="w-full bg-slate-50 py-24"
-    >
+    <section ref={sectionRef} id="testimonials" className="w-full bg-indigo-600 py-20">
       <div className="max-w-[1280px] mx-auto px-6">
-        <div className="text-center">
+        <div className="text-center mb-8">
           <SectionHeader
             overline="TESTIMONIALS"
-            heading="Loved by recruiters worldwide"
-            className="!mb-12"
+            heading="Words of praise from customers"
+            subheading="Real feedback from teams using HireSmart to scale hiring."
+            className="!mb-6"
           />
         </div>
 
-        <div
-          ref={cardsRef}
-          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6"
-        >
-          {testimonials.map((t) => (
-            <div
-              key={t.name}
-              className="group overflow-hidden rounded-3xl border border-slate-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-            >
-              <div className="mb-4 inline-flex items-center justify-center rounded-2xl bg-slate-100 p-3 text-sky-600 transition-colors duration-300 group-hover:bg-sky-50">
-                <Quote className="w-6 h-6" />
-              </div>
-              <p className="text-sm text-slate-600 italic leading-relaxed mb-6">
-                &ldquo;{t.quote}&rdquo;
-              </p>
-              <div className="flex items-center gap-3">
-                <img
-                  src={t.avatar}
-                  alt={t.name}
-                  className="w-12 h-12 rounded-full object-cover ring-1 ring-slate-200"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">{t.name}</p>
-                  <p className="text-xs text-slate-500">{t.role}</p>
+        <div className="rounded-[2rem] bg-white p-8 shadow-lg">
+          <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {testimonials.map((t) => (
+              <div
+                key={t.name}
+                className="group rounded-xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md"
+              >
+                <div className="mb-4 inline-flex items-center justify-center rounded-2xl bg-slate-100 p-2 text-sky-600">
+                  <Quote className="w-5 h-5" />
+                </div>
+                <p className="text-sm text-slate-700 italic leading-relaxed mb-6">
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div className="flex items-center gap-3">
+                  <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover ring-1 ring-slate-100" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{t.name}</p>
+                    <p className="text-xs text-slate-500">{t.role}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>

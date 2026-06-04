@@ -68,12 +68,12 @@ export default function PricingSection() {
     gsap.from(cards.children, {
       y: 50,
       opacity: 0,
-      stagger: 0.2,
-      duration: 1,
+      stagger: 0.18,
+      duration: 0.9,
       ease: 'power3.out',
       scrollTrigger: {
         trigger: section,
-        start: 'top 75%',
+        start: 'top 80%',
         toggleActions: 'play none none none',
       },
     })
@@ -104,69 +104,69 @@ export default function PricingSection() {
 
         <div
           ref={cardsRef}
-          className="grid grid-cols-1 gap-6 md:grid-cols-3"
+          className="grid grid-cols-1 gap-6 md:grid-cols-3 items-stretch"
         >
           {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative overflow-hidden rounded-[2.5rem] border p-1 transition duration-300 ${
-                plan.highlighted
-                  ? 'border-transparent bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 shadow-[0_30px_100px_-40px_rgba(15,23,42,0.65)]'
-                  : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xl'
-              }`}
-            >
-              <div className={`relative overflow-hidden rounded-[2.3rem] ${plan.highlighted ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
-                {plan.highlighted && (
-                  <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 translate-y-1 rounded-full bg-sky-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white shadow-lg">
-                    Most Popular
-                  </div>
-                )}
-                <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600" />
+            <div key={plan.name} className="flex">
+              <div className="relative w-full rounded-3xl p-1 transition-transform duration-300">
+                <div
+                  className={`relative overflow-hidden rounded-[1.6rem] h-full shadow-md flex flex-col ${
+                    plan.name === 'Premium'
+                      ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white transform md:-translate-y-4'
+                      : plan.name === 'Free'
+                      ? 'bg-white text-slate-900 border border-slate-100'
+                      : 'bg-slate-900 text-white'
+                  }`}
+                >
+                  <div className="p-8 lg:p-10 flex-1 flex flex-col justify-between">
+                    <div>
+                      <p className={`text-xs uppercase tracking-[0.24em] mb-3 ${plan.name === 'Premium' ? 'text-indigo-100' : 'text-slate-500'}`}>
+                        {plan.description}
+                      </p>
+                      <h3 className={`text-2xl font-semibold mb-4 ${plan.name === 'Premium' ? 'text-white' : ''}`}>
+                        {plan.name}
+                      </h3>
 
-                <div className="relative p-8 lg:p-10">
-                  <p className={`text-xs uppercase tracking-[0.24em] ${plan.highlighted ? 'text-sky-300' : 'text-sky-500'} mb-4`}>
-                    {plan.description}
-                  </p>
-                  <div className="mb-6">
-                    <h3 className="text-3xl font-semibold tracking-tight">
-                      {plan.name}
-                    </h3>
-                    <div className="mt-4 flex items-end gap-3">
-                      <span className="text-5xl font-bold tracking-[-0.05em]">
-                        {plan.price}
-                      </span>
-                      {plan.price !== 'Custom' && (
-                        <span className={`text-sm ${plan.highlighted ? 'text-slate-300' : 'text-slate-500'}`}>
-                          /month
+                      <div className="flex items-baseline gap-3 mb-6">
+                        <span className={`text-4xl md:text-5xl font-bold ${plan.name === 'Premium' ? 'text-white' : ''}`}>
+                          {plan.price}
                         </span>
-                      )}
+                        {plan.price !== 'Custom' && (
+                          <span className={`text-sm ${plan.name === 'Premium' ? 'text-indigo-100' : 'text-slate-400'}`}>
+                            /month
+                          </span>
+                        )}
+                      </div>
+
+                      <ul className="space-y-3 mb-6">
+                        {plan.features.map((feature) => (
+                          <li key={feature} className="flex items-start gap-3 text-sm">
+                            <span className={`mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full ${plan.name === 'Premium' ? 'bg-white/20 text-white' : plan.name === 'Free' ? 'bg-slate-100 text-sky-500' : 'bg-emerald-500 text-white'}`}>
+                              <Check className="h-3 w-3" />
+                            </span>
+                            <span className={`${plan.name === 'Premium' ? 'text-indigo-50' : plan.name === 'Free' ? 'text-slate-700' : 'text-slate-200'}`}>
+                              {feature}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <Link
+                        to="/register"
+                        className={`block w-full rounded-2xl py-3 text-sm font-semibold text-center ${
+                          plan.name === 'Premium'
+                            ? 'bg-white text-indigo-600 shadow-lg'
+                            : plan.name === 'Free'
+                            ? 'border border-slate-200 bg-white text-slate-900'
+                            : 'bg-slate-800 text-white'
+                        }`}
+                      >
+                        {plan.cta}
+                      </Link>
                     </div>
                   </div>
-
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature) => (
-                      <li
-                        key={feature}
-                        className={`flex items-start gap-3 text-sm leading-6 ${plan.highlighted ? 'text-slate-300' : 'text-slate-600'}`}
-                      >
-                        <span className={`mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full ${plan.highlighted ? 'bg-sky-500/20 text-sky-300' : 'bg-slate-100 text-sky-500'}`}>
-                          <Check className="h-3.5 w-3.5" />
-                        </span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link
-                    to="/register"
-                    className={`flex h-12 items-center justify-center rounded-2xl px-5 text-sm font-semibold transition duration-300 ${
-                      plan.highlighted
-                        ? 'bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 text-white shadow-lg hover:brightness-110'
-                        : 'border border-slate-300 bg-white text-slate-900 hover:bg-slate-50'
-                    }`}
-                  >
-                    {plan.cta}
-                  </Link>
                 </div>
               </div>
             </div>
