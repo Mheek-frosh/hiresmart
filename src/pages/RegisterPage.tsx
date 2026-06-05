@@ -45,25 +45,26 @@ export default function RegisterPage() {
       return
     }
 
-    const result = await signUp.__internal_future.create({
-      firstName: name,
-      lastName: '',
-      emailAddress: email,
-      unsafeMetadata: {
-        role,
-        company,
-      },
-      legalAccepted: true,
-    })
-
-    if (result.error) {
-      setError(result.error.longMessage ?? result.error.message ?? 'Unable to create account')
+    let createdSignUp
+    try {
+      createdSignUp = await signUp.create({
+        firstName: name,
+        lastName: '',
+        emailAddress: email,
+        unsafeMetadata: {
+          role,
+          company,
+        },
+        legalAccepted: true,
+      })
+    } catch (createError) {
+      setError('Unable to create account. Please check your details and try again.')
       setLoading(false)
       return
     }
 
     if (password) {
-      const passwordResult = await signUp.__internal_future.password({ password })
+      const passwordResult = await createdSignUp.__internal_future.password({ password })
       if (passwordResult.error) {
         setError(passwordResult.error.longMessage ?? passwordResult.error.message ?? 'Unable to set password')
         setLoading(false)
@@ -71,8 +72,8 @@ export default function RegisterPage() {
       }
     }
 
-    if (signUp.status === 'complete') {
-      const finalizeResult = await signUp.__internal_future.finalize()
+    if (createdSignUp.status === 'complete') {
+      const finalizeResult = await createdSignUp.__internal_future.finalize()
       if (finalizeResult.error) {
         setError(finalizeResult.error.longMessage ?? finalizeResult.error.message ?? 'Unable to complete sign up')
       } else {
@@ -82,8 +83,8 @@ export default function RegisterPage() {
       return
     }
 
-    if (signUp.status === 'missing_requirements') {
-      const sendResult = await signUp.__internal_future.verifications.sendEmailCode()
+    if (createdSignUp.status === 'missing_requirements') {
+      const sendResult = await createdSignUp.__internal_future.verifications.sendEmailCode()
       if (sendResult.error) {
         setError(sendResult.error.longMessage ?? sendResult.error.message ?? 'Unable to send verification code')
       } else {
