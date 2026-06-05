@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Brain, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Brain, Eye, EyeOff, ArrowRight, Loader } from 'lucide-react'
 import { useSignIn } from '@clerk/clerk-react'
 
 export default function LoginPage() {
@@ -212,8 +212,17 @@ export default function LoginPage() {
               disabled={loading || !isLoaded}
               className="w-full gradient-blue-purple text-white py-2.5 rounded-lg text-sm font-semibold transition-all hover:scale-[1.01] hover:shadow-glow flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {useOtp ? (isAwaitingCode ? 'Verify OTP' : 'Send OTP') : 'Sign In'}
-              <ArrowRight className="w-4 h-4" />
+              {loading ? (
+                <>
+                  <Loader className="w-4 h-4 animate-spin" />
+                  {useOtp ? (isAwaitingCode ? 'Verifying OTP...' : 'Sending OTP...') : 'Signing In...'}
+                </>
+              ) : (
+                <>
+                  {useOtp ? (isAwaitingCode ? 'Verify OTP' : 'Send OTP') : 'Sign In'}
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
 

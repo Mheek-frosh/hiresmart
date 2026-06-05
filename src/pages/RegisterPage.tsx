@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Brain, Eye, EyeOff, ArrowRight, User, Building2 } from 'lucide-react'
+import { Brain, Eye, EyeOff, ArrowRight, User, Building2, Loader } from 'lucide-react'
 import { useSignUp } from '@clerk/clerk-react'
 
 type Role = 'candidate' | 'recruiter'
@@ -245,8 +245,17 @@ export default function RegisterPage() {
               disabled={loading || !isLoaded}
               className="w-full gradient-blue-purple text-white py-2.5 rounded-lg text-sm font-semibold transition-all hover:scale-[1.01] hover:shadow-glow flex items-center justify-center gap-2 mt-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {needsVerification ? 'Verify & Continue' : 'Create Account'}
-              <ArrowRight className="w-4 h-4" />
+              {loading ? (
+                <>
+                  <Loader className="w-4 h-4 animate-spin" />
+                  {needsVerification ? 'Verifying...' : 'Creating Account...'}
+                </>
+              ) : (
+                <>
+                  {needsVerification ? 'Verify & Continue' : 'Create Account'}
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
 
