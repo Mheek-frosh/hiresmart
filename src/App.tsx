@@ -1,4 +1,6 @@
-import { Routes, Route } from 'react-router-dom'
+import type { ReactNode } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { SignedIn, SignedOut } from '@clerk/clerk-react'
 import LandingPage from '@/pages/LandingPage'
 import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
@@ -12,6 +14,28 @@ import TermsPage from '@/pages/TermsPage'
 import SecurityPage from '@/pages/SecurityPage'
 import CookiesPage from '@/pages/CookiesPage'
 
+function PrivateRoute({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <SignedIn>{children}</SignedIn>
+      <SignedOut>
+        <Navigate to="/login" replace />
+      </SignedOut>
+    </>
+  )
+}
+
+function PublicRoute({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <SignedOut>{children}</SignedOut>
+      <SignedIn>
+        <Navigate to="/dashboard" replace />
+      </SignedIn>
+    </>
+  )
+}
+
 export default function App() {
   return (
     <Routes>
@@ -24,9 +48,9 @@ export default function App() {
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/security" element={<SecurityPage />} />
       <Route path="/cookies" element={<CookiesPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+      <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
     </Routes>
   )
 }
