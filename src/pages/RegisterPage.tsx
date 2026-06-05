@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Brain, Eye, EyeOff, ArrowRight, User, Building2, Loader } from 'lucide-react'
-import { useSignUp } from '@clerk/clerk-react'
+import { useSignUp } from '@clerk/react/legacy'
 
 type Role = 'candidate' | 'recruiter'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
-  const { isLoaded, signUp } = useSignUp()
+    const { signUp, isLoaded, setActive } = useSignUp()
   const [role, setRole] = useState<Role>('recruiter')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -16,15 +16,18 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [verificationCode, setVerificationCode] = useState('')
   const [needsVerification, setNeedsVerification] = useState(false)
-  const [preparedSignUp, setPreparedSignUp] = useState<any>(null)
   const [resendStatus, setResendStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const getClerkErrorMessage = (err: any) => {
+    const clerkError = err?.errors?.[0]
+    return clerkError?.longMessage || clerkError?.message || err?.message || 'An error occurred'
+  }
+
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    console.log('isLoaded', isLoaded, 'signUp', signUp)
-    if (!isLoaded || !signUp) {
+    if (!isLoaded || !signUp || !setActive) {
       console.warn('Clerk is not ready yet: isLoaded=', isLoaded, 'signUp=', signUp)
       return
     }
@@ -32,107 +35,74 @@ export default function RegisterPage() {
     setError(null)
     setResendStatus(null)
 
-    if (needsVerification && preparedSignUp) {
+    if (needsVerification) {
       try {
-        const verified = await preparedSignUp.attemptEmailAddressVerification({ code: verificationCode })
-        console.log('attemptEmailAddressVerification', verified)
-        if (verified.status !== 'complete') {
-          setError('Verification succeeded but sign up is not complete. Please try again.')
-          setLoading(false)
-          return
-        }
+        const verified = await signUp.attemptEmailAddressVerification({
+          code: verificationCode,
+        })
+        console.log('attemptEmailAddressVerification result:', verified)
 
-        const finalizeResult = await verified.__internal_future.finalize()
-        if (finalizeResult.error) {
-          setError(finalizeResult.error.longMessage ?? finalizeResult.error.message ?? 'Unable to complete sign up')
-          setLoading(false)
-          return
+        if (verified.status === 'complete') {
+          await setActive({ session: verified.createdSessionId })
+          navigate('/dashboard')
+        } else {
+          console.warn('Sign-up status incomplete after verification:', verified.status)
+          setError('Verification succeeded but sign up is not complete. Please check for missing requirements.')
         }
-
-        navigate('/dashboard')
+      } catch (err: any) {
+        console.error('attemptEmailAddressVerification error:', err)
+        setError(getClerkErrorMessage(err))
+      } finally {
         setLoading(false)
-        return
-      } catch (verifyError) {
-        console.error('attemptEmailAddressVerification error', verifyError)
-        setError('Verification failed. Please check the code and try again.')
-        setLoading(false)
-        return
       }
+      return
     }
 
-    let createdSignUp
     try {
-      createdSignUp = await signUp.create({
+      const createdSignUp = await signUp.create({
         firstName: name,
-        lastName: '',
         emailAddress: email,
+        password: password,
         unsafeMetadata: {
           role,
           company,
         },
-        legalAccepted: true,
       })
-      console.log('createdSignUp', createdSignUp)
-      console.log('status', createdSignUp?.status)
-    } catch (createError) {
-      console.error('signUp create error', createError)
-      setError('Unable to create account. Please check your details and try again.')
-      setLoading(false)
-      return
-    }
+      console.log('createdSignUp result:', createdSignUp)
 
-    if (password) {
-      const passwordResult = await createdSignUp.__internal_future.password({ password })
-      if (passwordResult.error) {
-        setError(passwordResult.error.longMessage ?? passwordResult.error.message ?? 'Unable to set password')
-        setLoading(false)
-        return
-      }
-    }
-
-    if (createdSignUp.status === 'complete') {
-      const finalizeResult = await createdSignUp.__internal_future.finalize()
-      if (finalizeResult.error) {
-        setError(finalizeResult.error.longMessage ?? finalizeResult.error.message ?? 'Unable to complete sign up')
-      } else {
+      if (createdSignUp.status === 'complete') {
+        await setActive({ session: createdSignUp.createdSessionId })
         navigate('/dashboard')
-      }
-      setLoading(false)
-      return
-    }
-
-    if (createdSignUp.status === 'missing_requirements') {
-      try {
-        const prepared = await createdSignUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-        console.log('prepareEmailAddressVerification', prepared)
-        setPreparedSignUp(prepared)
+      } else if (createdSignUp.status === 'missing_requirements') {
+        await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
         setNeedsVerification(true)
-      } catch (verificationError) {
-        console.error('prepareEmailAddressVerification error', verificationError)
-        setError('Unable to send verification code. Please try again.')
+      } else {
+        console.warn('Unexpected sign-up status:', createdSignUp.status)
+        setError('Unexpected status during signup. Please check your email to complete registration.')
       }
-    } else {
-      console.error('unexpected sign-up status', createdSignUp.status, createdSignUp)
-      setError('Please check your email to complete registration.')
+    } catch (err: any) {
+      console.error('signUp create error:', err)
+      setError(getClerkErrorMessage(err))
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   const resendOtp = async () => {
-    if (!preparedSignUp) return
+    if (!signUp) return
     setLoading(true)
     setError(null)
     setResendStatus(null)
 
-    const sendResult = await preparedSignUp.__internal_future.verifications.sendEmailCode()
-    if (sendResult.error) {
-      setError(sendResult.error.longMessage ?? sendResult.error.message ?? 'Unable to resend verification code')
-    } else {
+    try {
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
       setResendStatus('Verification code resent. Check your email.')
+    } catch (err: any) {
+      console.error('Resend verification error:', err)
+      setError(getClerkErrorMessage(err))
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (

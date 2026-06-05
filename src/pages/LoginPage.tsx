@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Brain, Eye, EyeOff, ArrowRight, Loader } from 'lucide-react'
-import { useSignIn } from '@clerk/clerk-react'
+import { useSignIn } from '@clerk/react/legacy'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { isLoaded, signIn } = useSignIn()
+  const { signIn, isLoaded, setActive } = useSignIn()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -15,32 +15,35 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  const getClerkErrorMessage = (err: any) => {
+    const clerkError = err?.errors?.[0]
+    return clerkError?.longMessage || clerkError?.message || err?.message || 'An error occurred'
+  }
+
   const signInWithPassword = async () => {
-    if (!signIn) return
+    if (!signIn || !setActive) return
     setLoading(true)
     setError(null)
 
-    const response = await signIn.__internal_future.create({ identifier: email })
-    if (response.error) {
-      setError(response.error.longMessage ?? response.error.message ?? 'Unable to sign in')
-      setLoading(false)
-      return
-    }
+    try {
+      const result = await signIn.create({
+        identifier: email,
+        password: password,
+      })
 
-    const passwordResult = await signIn.__internal_future.password({ password })
-    if (passwordResult.error) {
-      setError(passwordResult.error.longMessage ?? passwordResult.error.message ?? 'Unable to sign in')
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId })
+        navigate('/dashboard')
+      } else {
+        console.warn('Sign-in status incomplete:', result.status)
+        setError('Unable to complete sign-in. Additional steps required.')
+      }
+    } catch (err: any) {
+      console.error('Sign-in with password error:', err)
+      setError(getClerkErrorMessage(err))
+    } finally {
       setLoading(false)
-      return
     }
-
-    const finalizeResult = await signIn.__internal_future.finalize()
-    if (finalizeResult.error) {
-      setError(finalizeResult.error.longMessage ?? finalizeResult.error.message ?? 'Unable to complete sign in')
-    } else {
-      navigate('/dashboard')
-    }
-    setLoading(false)
   }
 
   const sendOtp = async () => {
@@ -48,44 +51,60 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const response = await signIn.__internal_future.create({ identifier: email })
-    if (response.error) {
-      setError(response.error.longMessage ?? response.error.message ?? 'Unable to start OTP sign in')
-      setLoading(false)
-      return
-    }
+    try {
+      const result = await signIn.create({ identifier: email })
+      const emailCodeFactor = result.supportedFirstFactors?.find(
+        (factor) => factor.strategy === 'email_code'
+      )
 
-    const sendResult = await signIn.__internal_future.emailCode.sendCode({ emailAddress: email })
-    if (sendResult.error) {
-      setError(sendResult.error.longMessage ?? sendResult.error.message ?? 'Unable to send OTP code')
-      setLoading(false)
-      return
-    }
+      if (!emailCodeFactor) {
+        setError('Email code sign-in is not supported or allowed for this user.')
+        return
+      }
 
-    setIsAwaitingCode(true)
-    setLoading(false)
+      const prepResult = await signIn.prepareFirstFactor({
+        strategy: 'email_code',
+        emailAddressId: (emailCodeFactor as any).emailAddressId,
+      })
+
+      if (prepResult.status === 'needs_first_factor') {
+        setIsAwaitingCode(true)
+      } else {
+        console.warn('Prepare factor status:', prepResult.status)
+        setError('Unable to start verification. Please try again.')
+      }
+    } catch (err: any) {
+      console.error('Send OTP error:', err)
+      setError(getClerkErrorMessage(err))
+    } finally {
+      setLoading(false)
+    }
   }
 
   const verifyOtp = async () => {
-    if (!signIn) return
+    if (!signIn || !setActive) return
     setLoading(true)
     setError(null)
 
-    const result = await signIn.__internal_future.emailCode.verifyCode({ code })
-    if (result.error) {
-      setError(result.error.longMessage ?? result.error.message ?? 'OTP verification failed')
+    try {
+      const result = await signIn.attemptFirstFactor({
+        strategy: 'email_code',
+        code: code,
+      })
+
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId })
+        navigate('/dashboard')
+      } else {
+        console.warn('Verify OTP status incomplete:', result.status)
+        setError('Verification incomplete. Additional verification steps required.')
+      }
+    } catch (err: any) {
+      console.error('Verify OTP error:', err)
+      setError(getClerkErrorMessage(err))
+    } finally {
       setLoading(false)
-      return
     }
-
-    const finalizeResult = await signIn.__internal_future.finalize()
-    if (finalizeResult.error) {
-      setError(finalizeResult.error.longMessage ?? finalizeResult.error.message ?? 'Unable to complete sign in')
-    } else {
-      navigate('/dashboard')
-    }
-
-    setLoading(false)
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

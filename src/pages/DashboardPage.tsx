@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useClerk } from '@clerk/react'
 import {
   LayoutDashboard,
   Briefcase,
@@ -459,8 +460,19 @@ function SettingsTab() {
 
 export default function DashboardPage() {
   const navigate = useNavigate()
+  const { signOut } = useClerk()
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      navigate('/')
+    } catch (err) {
+      console.error('Error signing out:', err)
+      navigate('/')
+    }
+  }
 
   const renderTab = () => {
     switch (activeTab) {
@@ -510,7 +522,7 @@ export default function DashboardPage() {
 
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-sidebar-border">
           <button
-            onClick={() => navigate('/')}
+            onClick={handleSignOut}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors w-full"
           >
             <LogOut className="w-[18px] h-[18px]" />

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X, Brain, ChevronDown } from 'lucide-react'
+import { useAuth } from '@clerk/react'
 
 export default function Navigation() {
+  const { isSignedIn } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [companyOpen, setCompanyOpen] = useState(false)
@@ -119,12 +121,21 @@ export default function Navigation() {
         </div>
 
         <div className="hidden md:block">
-          <Link
-            to="/register"
-            className="gradient-blue-purple text-white rounded-full px-6 py-2 text-sm font-semibold transition duration-200 hover:scale-[1.03] hover:shadow-glow"
-          >
-            Get Started
-          </Link>
+          {isSignedIn ? (
+            <Link
+              to="/dashboard"
+              className="gradient-blue-purple text-white rounded-full px-6 py-2 text-sm font-semibold transition duration-200 hover:scale-[1.03] hover:shadow-glow"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              to="/register"
+              className="gradient-blue-purple text-white rounded-full px-6 py-2 text-sm font-semibold transition duration-200 hover:scale-[1.03] hover:shadow-glow"
+            >
+              Get Started
+            </Link>
+          )}
         </div>
 
         <button
@@ -166,13 +177,23 @@ export default function Navigation() {
                 </div>
               </div>
 
-              <Link
-                to="/register"
-                onClick={() => setMobileOpen(false)}
-                className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-              >
-                Get Started
-              </Link>
+              {isSignedIn ? (
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <Link
+                  to="/register"
+                  onClick={() => setMobileOpen(false)}
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Get Started
+                </Link>
+              )}
             </div>
           </div>
         </div>

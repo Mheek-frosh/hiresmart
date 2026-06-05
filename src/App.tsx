@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { SignedIn, SignedOut } from '@clerk/clerk-react'
+import { useAuth } from '@clerk/react'
 import LandingPage from '@/pages/LandingPage'
 import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
@@ -15,25 +15,15 @@ import SecurityPage from '@/pages/SecurityPage'
 import CookiesPage from '@/pages/CookiesPage'
 
 function PrivateRoute({ children }: { children: ReactNode }) {
-  return (
-    <>
-      <SignedIn>{children}</SignedIn>
-      <SignedOut>
-        <Navigate to="/login" replace />
-      </SignedOut>
-    </>
-  )
+  const { isLoaded, isSignedIn } = useAuth()
+  if (!isLoaded) return null
+  return isSignedIn ? <>{children}</> : <Navigate to="/login" replace />
 }
 
 function PublicRoute({ children }: { children: ReactNode }) {
-  return (
-    <>
-      <SignedOut>{children}</SignedOut>
-      <SignedIn>
-        <Navigate to="/dashboard" replace />
-      </SignedIn>
-    </>
-  )
+  const { isLoaded, isSignedIn } = useAuth()
+  if (!isLoaded) return null
+  return !isSignedIn ? <>{children}</> : <Navigate to="/dashboard" replace />
 }
 
 export default function App() {
