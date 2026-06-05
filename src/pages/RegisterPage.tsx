@@ -23,29 +23,41 @@ export default function RegisterPage() {
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!isLoaded || !signUp) return
+    console.log('isLoaded', isLoaded, 'signUp', signUp)
+    if (!isLoaded || !signUp) {
+      console.warn('Clerk is not ready yet: isLoaded=', isLoaded, 'signUp=', signUp)
+      return
+    }
     setLoading(true)
     setError(null)
     setResendStatus(null)
 
     if (needsVerification && preparedSignUp) {
-      const result = await preparedSignUp.__internal_future.verifications.verifyEmailCode({ code: verificationCode })
-      if (result.error) {
-        setError(result.error.longMessage ?? result.error.message ?? 'Verification failed')
+      try {
+        const verified = await preparedSignUp.attemptEmailAddressVerification({ code: verificationCode })
+        console.log('attemptEmailAddressVerification', verified)
+        if (verified.status !== 'complete') {
+          setError('Verification succeeded but sign up is not complete. Please try again.')
+          setLoading(false)
+          return
+        }
+
+        const finalizeResult = await verified.__internal_future.finalize()
+        if (finalizeResult.error) {
+          setError(finalizeResult.error.longMessage ?? finalizeResult.error.message ?? 'Unable to complete sign up')
+          setLoading(false)
+          return
+        }
+
+        navigate('/dashboard')
+        setLoading(false)
+        return
+      } catch (verifyError) {
+        console.error('attemptEmailAddressVerification error', verifyError)
+        setError('Verification failed. Please check the code and try again.')
         setLoading(false)
         return
       }
-
-      const finalizeResult = await preparedSignUp.__internal_future.finalize()
-      if (finalizeResult.error) {
-        setError(finalizeResult.error.longMessage ?? finalizeResult.error.message ?? 'Unable to complete sign up')
-        setLoading(false)
-        return
-      }
-
-      navigate('/dashboard')
-      setLoading(false)
-      return
     }
 
     let createdSignUp
@@ -60,7 +72,10 @@ export default function RegisterPage() {
         },
         legalAccepted: true,
       })
+      console.log('createdSignUp', createdSignUp)
+      console.log('status', createdSignUp?.status)
     } catch (createError) {
+      console.error('signUp create error', createError)
       setError('Unable to create account. Please check your details and try again.')
       setLoading(false)
       return
@@ -87,14 +102,17 @@ export default function RegisterPage() {
     }
 
     if (createdSignUp.status === 'missing_requirements') {
-      const sendResult = await createdSignUp.__internal_future.verifications.sendEmailCode()
-      if (sendResult.error) {
-        setError(sendResult.error.longMessage ?? sendResult.error.message ?? 'Unable to send verification code')
-      } else {
-        setPreparedSignUp(createdSignUp)
+      try {
+        const prepared = await createdSignUp.prepareEmailAddressVerification({ strategy: 'email_code' })
+        console.log('prepareEmailAddressVerification', prepared)
+        setPreparedSignUp(prepared)
         setNeedsVerification(true)
+      } catch (verificationError) {
+        console.error('prepareEmailAddressVerification error', verificationError)
+        setError('Unable to send verification code. Please try again.')
       }
     } else {
+      console.error('unexpected sign-up status', createdSignUp.status, createdSignUp)
       setError('Please check your email to complete registration.')
     }
 
